@@ -6,10 +6,17 @@ from .models import Profile,Crew, Designation
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django.contrib.auth import login
-from .serializers import LoginSerializer,CrewSerializer, DesignationSerializer,CrewCreateSerializer,DesignationCreateSerializer,CrewDetailSerializer
+from .serializers import LoginSerializer,CrewSerializer, DesignationSerializer,CrewCreateSerializer\
+    ,DesignationCreateSerializer,CrewDetailSerializer,UserProfileSerializer
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
+
+
+
+
 
 User = get_user_model()
 
@@ -24,7 +31,11 @@ class LoginAPIView(generics.GenericAPIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             login(request, user)
-            return Response({"status": True, "message": "Login success"}, status=HTTP_200_OK)
+            response_data = {
+                "message": "User Login success",
+                "status": True
+            }
+            return Response(response_data, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
     
 
@@ -90,3 +101,49 @@ class CrewDetailByNameAPIView(generics.GenericAPIView):
         crew = get_object_or_404(Crew, name=name)
         serializer = self.get_serializer(crew)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserProfileAPIView(generics.RetrieveAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = UserProfileSerializer
+    lookup_field = 'user_id'
+
+
+#for accept - reject req from user
+
+class ProfileUpdateRequest(APIView):
+    def post(self, request, user_id):
+        action = request.data.get('action')  
+        
+        try:
+            profile = Profile.objects.get(user_id=user_id)
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'accept':
+            profile.save() 
+            return Response({'message': 'Profile update request accepted'}, status=status.HTTP_200_OK)
+        elif action == 'reject':
+            profile.delete()
+            return Response({'message': 'Profile update request rejected'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+#for admin login
+
+class SuperuserLogin(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = None
+        if user is not None and user.is_superuser:
+            authenticated_user = authenticate(username=user.username, password=password)
+            if authenticated_user is not None and authenticated_user.is_superuser:
+                return Response({'message': 'Superuser login successful', 'user': user.username}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid credentials or user is not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'error': 'Invalid credentials or user is not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)

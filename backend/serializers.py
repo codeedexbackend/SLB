@@ -20,13 +20,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return profile
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    crew = serializers.PrimaryKeyRelatedField(queryset=Crew.objects.all())
-    designation = serializers.PrimaryKeyRelatedField(queryset=Designation.objects.all())
+    crew_name = serializers.SerializerMethodField()
+    designation_name = serializers.SerializerMethodField()
+
+    def get_crew_name(self, instance):
+        crew = instance.crew
+        return crew.name if crew else None
+
+    def get_designation_name(self, instance):
+        designation = instance.designation
+        return designation.name if designation else None
 
     class Meta:
         model = Profile
         fields = [
-            'gate_pass_no', 'crew', 'designation', 'rig_or_rigless',
+            'gate_pass_no', 'crew', 'crew_name', 'designation', 'designation_name', 'rig_or_rigless',
             'project_name', 'company_name', 'profile_photo'
         ]
 
@@ -92,3 +100,10 @@ class CrewDetailSerializer(serializers.ModelSerializer):
         designations = data.pop('designations', [])  # Check if 'designations' exists, otherwise set to empty list
         data['designations'] = [designation['name'] for designation in designations]
         return data
+    
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['user', 'gate_pass_no', 'crew', 'designation', 'rig_or_rigless', 'project_name', 'company_name', 'profile_photo','full_name']
