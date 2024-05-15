@@ -22,6 +22,9 @@ User = get_user_model()
 
 class UserRegistrationAPIView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
+    authentication_classes = []
+    permission_classes = []
+    
 
 class LoginAPIView(generics.GenericAPIView):
     serializer_class = LoginSerializer
@@ -132,6 +135,8 @@ class ProfileUpdateRequest(APIView):
 #for admin login
 
 class SuperuserLogin(APIView):
+    authentication_classes = []
+    permission_classes = []
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
