@@ -9,22 +9,8 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=100,default='name')
     mobile_number = models.CharField(max_length=15,unique=True)
     gate_pass_no = models.CharField(max_length=50)
-    CREW_CHOICES = [
-        ('Crew1', 'Crew 1'),
-        ('Crew2', 'Crew 2'),
-        ('Crew3', 'Crew 3'),
-        ('Crew4', 'Crew 4'),
-        ('Crew5', 'Crew 5'),
-    ]
-    crew = models.CharField(max_length=10, choices=CREW_CHOICES)
-    DESIGNATION_CHOICES = [
-        ('Designation1', 'Designation 1'),
-        ('Designation2', 'Designation 2'),
-        ('Designation3', 'Designation 3'),
-        ('Designation4', 'Designation 4'),
-        ('Designation5', 'Designation 5'),
-    ]
-    designation = models.CharField(max_length=15, choices=DESIGNATION_CHOICES)
+    crew = models.ForeignKey('Crew', on_delete=models.SET_NULL, null=True, related_name='profiles')
+    designation = models.ForeignKey('Designation', on_delete=models.SET_NULL, null=True, related_name='profiles')
     RIG_CHOICES = [
         ('Rig', 'Rig'),
         ('Rigless', 'Rigless'),
@@ -36,3 +22,17 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class Crew(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Designation(models.Model):
+    name = models.CharField(max_length=50)
+    crew = models.ForeignKey(Crew, on_delete=models.CASCADE, related_name='designations')
+
+
+    def __str__(self):
+        return f"{self.name} ({self.crew.name})"
