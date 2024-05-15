@@ -107,3 +107,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['user', 'gate_pass_no', 'crew', 'designation', 'rig_or_rigless', 'project_name', 'company_name', 'profile_photo','full_name']
+
+class ProfilePhotoUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['profile_photo']
