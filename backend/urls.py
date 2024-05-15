@@ -26,6 +26,8 @@ urlpatterns = [
     path('profile/Accept-Reject/<int:user_id>/', views.ProfileUpdateRequest.as_view(), name='profile_update_request'),
     path('Admin/login/', views.SuperuserLogin.as_view(), name='Admin_login'),
     path('dp-update/<int:user_id>/', views.ProfilePhotoUpdateAPIView.as_view(), name='profile-photo-update'),
+    path('profile-search/', views.ProfileSearchAPIView.as_view(), name='profile-search'),
+
 
 
 

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django.contrib.auth import login
 from .serializers import LoginSerializer,CrewSerializer, DesignationSerializer,CrewCreateSerializer\
-    ,DesignationCreateSerializer,CrewDetailSerializer,UserProfileSerializer,ProfilePhotoUpdateSerializer
+    ,DesignationCreateSerializer,CrewDetailSerializer,UserProfileSerializer,ProfilePhotoUpdateSerializer,ProfileSerializer
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -165,3 +165,24 @@ class ProfilePhotoUpdateAPIView(generics.UpdateAPIView):
         user_id = self.kwargs.get('user_id')
         profile = get_object_or_404(Profile, user_id=user_id)
         return profile
+    
+class ProfileSearchAPIView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        queryset = Profile.objects.all()
+        full_name = self.request.query_params.get('full_name', None)
+        gate_pass_no = self.request.query_params.get('gate_pass_no', None)
+        project_name = self.request.query_params.get('project_name', None)
+        company_name = self.request.query_params.get('company_name', None)
+
+        if full_name:
+            queryset = queryset.filter(full_name__icontains=full_name)
+        if gate_pass_no:
+            queryset = queryset.filter(gate_pass_no__icontains=gate_pass_no)
+        if project_name:
+            queryset = queryset.filter(project_name__icontains=project_name)
+        if company_name:
+            queryset = queryset.filter(company_name__icontains=company_name)
+
+        return queryset
