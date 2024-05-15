@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from django.contrib.auth import login
 from .serializers import LoginSerializer,CrewSerializer, DesignationSerializer,CrewCreateSerializer\
-    ,DesignationCreateSerializer,CrewDetailSerializer,UserProfileSerializer
+    ,DesignationCreateSerializer,CrewDetailSerializer,UserProfileSerializer,ProfilePhotoUpdateSerializer,ProfileSerializer
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 
@@ -152,3 +153,22 @@ class SuperuserLogin(APIView):
                 return Response({'error': 'Invalid credentials or user is not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response({'error': 'Invalid credentials or user is not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+class ProfilePhotoUpdateAPIView(generics.UpdateAPIView):
+    authentication_classes = []
+    permission_classes = []
+    queryset = Profile.objects.all()
+    serializer_class = ProfilePhotoUpdateSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        profile = get_object_or_404(Profile, user_id=user_id)
+        return profile
+    
+
+class AllUsersView(APIView):
+    def get(self, request):
+        profiles = Profile.objects.all()
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

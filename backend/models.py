@@ -38,3 +38,5 @@ class Designation(models.Model):
         return f"{self.name} ({self.crew.name})"
     
 
+
+

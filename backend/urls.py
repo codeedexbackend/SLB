@@ -25,6 +25,10 @@ urlpatterns = [
     path('profile/<int:user_id>/', views.UserProfileAPIView.as_view(), name='user-profile'),
     path('profile/Accept-Reject/<int:user_id>/', views.ProfileUpdateRequest.as_view(), name='profile_update_request'),
     path('Admin/login/', views.SuperuserLogin.as_view(), name='Admin_login'),
+    path('dp-update/<int:user_id>/', views.ProfilePhotoUpdateAPIView.as_view(), name='profile-photo-update'),
+    path('all-users/', views.AllUsersView.as_view(), name='all_users'),
+
+
 
 
 ]
